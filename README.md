@@ -1,4 +1,4 @@
-# Developer Productivity — Model Comparison (Day 6)
+# Developer Productivity — Model Comparison (Day 7)
 
 Internship Day 6 task: training and comparing multiple classification models on a developer productivity dataset to predict `developer_id` from behavioral/productivity features.
 
