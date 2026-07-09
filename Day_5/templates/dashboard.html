@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Developer Productivity & Code Quality Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0f1115;
+    color: #e6e6e6;
+    margin: 0;
+    padding: 24px;
+  }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  p.subtitle { color: #9aa0a6; margin-top: 0; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .card {
+    background: #1a1d24;
+    border: 1px solid #2a2e37;
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .card h2 { font-size: 15px; margin-top: 0; color: #9db4ff; }
+  .stat-row { display: flex; gap: 16px; margin-bottom: 20px; }
+  .stat-box {
+    flex: 1;
+    background: #1a1d24;
+    border: 1px solid #2a2e37;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-box .value { font-size: 26px; font-weight: 700; color: #6fd07f; }
+  .stat-box .label { font-size: 12px; color: #9aa0a6; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #2a2e37; }
+  th { color: #9aa0a6; font-weight: 600; }
+  form label { display: block; font-size: 12px; color: #9aa0a6; margin-top: 8px; }
+  form input {
+    width: 100%; padding: 6px 8px; margin-top: 2px;
+    background: #0f1115; border: 1px solid #2a2e37; border-radius: 6px; color: #e6e6e6;
+  }
+  form button {
+    margin-top: 14px; width: 100%; padding: 10px;
+    background: #4C6EF5; border: none; border-radius: 6px;
+    color: white; font-weight: 600; cursor: pointer;
+  }
+  form button:hover { background: #3d5bd8; }
+  #predictionResult { margin-top: 14px; font-size: 14px; }
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+  .Low { background: #1e3a2a; color: #6fd07f; }
+  .Medium { background: #3a341e; color: #e6c96f; }
+  .High { background: #3a1e1e; color: #f77c7c; }
+</style>
+</head>
+<body>
+
+<h1>Developer Productivity & Code Quality Dashboard</h1>
+<p class="subtitle">Commit risk prediction powered by RandomForestClassifier</p>
+
+<div class="stat-row" id="statRow"></div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Commit Risk Distribution</h2>
+    <canvas id="riskChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Feature Importance</h2>
+    <canvas id="importanceChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Top 10 Developers by Weekly Commits</h2>
+    <table id="devTable">
+      <thead>
+        <tr><th>Developer</th><th>Avg Commits</th><th>Avg Bugs</th><th>Avg Coverage %</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Predict Commit Risk</h2>
+    <form id="predictForm">
+      <label>Commits per week</label>
+      <input type="number" name="commits_per_week" value="8" required>
+      <label>Lines added</label>
+      <input type="number" name="lines_added" value="150" required>
+      <label>Lines deleted</label>
+      <input type="number" name="lines_deleted" value="60" required>
+      <label>Files changed</label>
+      <input type="number" name="files_changed" value="5" required>
+      <label>Bugs reported</label>
+      <input type="number" name="bugs_reported" value="1" required>
+      <label>Code review comments</label>
+      <input type="number" name="code_review_comments" value="3" required>
+      <label>Avg review time (hours)</label>
+      <input type="number" step="0.1" name="avg_review_time_hours" value="6" required>
+      <label>Test coverage (%)</label>
+      <input type="number" step="0.1" name="test_coverage_percent" value="75" required>
+      <label>Deployment frequency (per week)</label>
+      <input type="number" name="deployment_frequency" value="2" required>
+      <label>Late night commits</label>
+      <input type="number" name="late_night_commits" value="1" required>
+      <button type="submit">Predict Risk</button>
+    </form>
+    <div id="predictionResult"></div>
+  </div>
+</div>
+
+<script>
+async function loadSummary() {
+  const res = await fetch('/api/summary');
+  const d = await res.json();
+
+  // Stat boxes
+  const statRow = document.getElementById('statRow');
+  statRow.innerHTML = `
+    <div class="stat-box"><div class="value">${d.total_records}</div><div class="label">Total Records</div></div>
+    <div class="stat-box"><div class="value">${d.avg_test_coverage}%</div><div class="label">Avg Test Coverage</div></div>
+    <div class="stat-box"><div class="value">${d.avg_bugs_per_week}</div><div class="label">Avg Bugs / Week</div></div>
+  `;
+
+  // Risk distribution chart
+  new Chart(document.getElementById('riskChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(d.risk_counts),
+      datasets: [{
+        data: Object.values(d.risk_counts),
+        backgroundColor: ['#6fd07f', '#e6c96f', '#f77c7c']
+      }]
+    },
+    options: { plugins: { legend: { labels: { color: '#e6e6e6' } } } }
+  });
+
+  // Feature importance chart
+  new Chart(document.getElementById('importanceChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(d.feature_importance),
+      datasets: [{
+        label: 'Importance',
+        data: Object.values(d.feature_importance),
+        backgroundColor: '#4C6EF5'
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#9aa0a6' } },
+        y: { ticks: { color: '#9aa0a6' } }
+      }
+    }
+  });
+
+  // Developer table
+  const tbody = document.querySelector('#devTable tbody');
+  d.top_developers.forEach(dev => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${dev.developer_id}</td><td>${dev.avg_commits}</td><td>${dev.avg_bugs}</td><td>${dev.avg_coverage}</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+document.getElementById('predictForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const payload = {};
+  formData.forEach((value, key) => payload[key] = parseFloat(value));
+
+  const res = await fetch('/api/predict', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const result = await res.json();
+
+  document.getElementById('predictionResult').innerHTML = `
+    Predicted Risk: <span class="badge ${result.commit_risk}">${result.commit_risk}</span>
+    <br><br>
+    Low: ${result.probabilities.Low ?? '-'} &nbsp;
+    Medium: ${result.probabilities.Medium ?? '-'} &nbsp;
+    High: ${result.probabilities.High ?? '-'}
+  `;
+});
+
+loadSummary();
+</script>
+
+</body>
+</html>
