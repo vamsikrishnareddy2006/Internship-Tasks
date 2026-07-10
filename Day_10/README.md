@@ -71,4 +71,4 @@ By completing this project, I learned:
 ## 👨‍💻 Author
 **Vamsi**
 
-GitHub: https://github.com/your-github-username
+GitHub: https://github.com/vamsikrishnareddy2006/Internship-Tasks.git
