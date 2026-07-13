@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Expense Tracker{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to your Expense Dashboard</h1>
+    <p>Keep track of every rupee, one expense at a time.</p>
+</section>
+
+<section class="dashboard-cards">
+    <div class="card">
+        <div class="card-icon">💵</div>
+        <div class="card-info">
+            <h3>Total Expenses</h3>
+            <p class="card-value">₹{{ "%.2f"|format(total_expenses) }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-icon">🧾</div>
+        <div class="card-info">
+            <h3>Total Records</h3>
+            <p class="card-value">{{ total_count }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-icon">📂</div>
+        <div class="card-info">
+            <h3>Categories Used</h3>
+            <p class="card-value">{{ category_count }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-icon">🏆</div>
+        <div class="card-info">
+            <h3>Top Category</h3>
+            <p class="card-value">{{ top_category }}</p>
+        </div>
+    </div>
+</section>
+
+<section class="quick-actions">
+    <a href="{{ url_for('add_expense') }}" class="btn btn-primary">+ Add New Expense</a>
+    <a href="{{ url_for('expenses') }}" class="btn btn-secondary">View All Expenses</a>
+    <a href="{{ url_for('summary') }}" class="btn btn-secondary">View Summary</a>
+</section>
+
+<section class="recent-section">
+    <h2>Recent Expenses</h2>
+    {% if recent_expenses %}
+    <div class="table-wrapper">
+        <table class="expense-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Payment Mode</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in recent_expenses %}
+                <tr>
+                    <td>{{ expense.title }}</td>
+                    <td><span class="badge">{{ expense.category }}</span></td>
+                    <td>₹{{ "%.2f"|format(expense.amount) }}</td>
+                    <td>{{ expense.expense_date }}</td>
+                    <td>{{ expense.payment_mode }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No expenses recorded yet. <a href="{{ url_for('add_expense') }}">Add your first expense</a>.</p>
+    {% endif %}
+</section>
+{% endblock %}

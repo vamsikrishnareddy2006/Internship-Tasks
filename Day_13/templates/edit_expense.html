@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Edit Expense - Expense Tracker{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <h1>Edit Expense</h1>
+    <form action="{{ url_for('edit_expense', id=expense.id) }}" method="POST" class="expense-form" id="editForm" novalidate>
+        <div class="form-group">
+            <label for="title">Expense Title *</label>
+            <input type="text" id="title" name="title" value="{{ expense.title }}" required>
+            <span class="error-msg" id="titleError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Amount (₹) *</label>
+            <input type="number" id="amount" name="amount" value="{{ expense.amount }}" step="0.01" min="0.01" required>
+            <span class="error-msg" id="amountError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category *</label>
+            <select id="category" name="category" required>
+                {% for cat in categories %}
+                <option value="{{ cat }}" {{ 'selected' if expense.category == cat }}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="payment_mode">Payment Mode *</label>
+            <select id="payment_mode" name="payment_mode" required>
+                {% for mode in payment_modes %}
+                <option value="{{ mode }}" {{ 'selected' if expense.payment_mode == mode }}>{{ mode }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="expense_date">Date *</label>
+            <input type="date" id="expense_date" name="expense_date" value="{{ expense.expense_date }}" required>
+            <span class="error-msg" id="dateError"></span>
+        </div>
+
+        <div class="form-group full-width">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="3">{{ expense.description or '' }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Update Expense</button>
+            <a href="{{ url_for('expenses') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('editForm').addEventListener('submit', function (e) {
+        let valid = true;
+        const title = document.getElementById('title');
+        const amount = document.getElementById('amount');
+        const date = document.getElementById('expense_date');
+
+        document.querySelectorAll('.error-msg').forEach(el => el.textContent = '');
+
+        if (!title.value.trim()) {
+            document.getElementById('titleError').textContent = 'Title is required.';
+            valid = false;
+        }
+        if (!amount.value || parseFloat(amount.value) <= 0) {
+            document.getElementById('amountError').textContent = 'Enter a valid amount greater than 0.';
+            valid = false;
+        }
+        if (!date.value) {
+            document.getElementById('dateError').textContent = 'Please select a date.';
+            valid = false;
+        }
+        if (!valid) e.preventDefault();
+    });
+</script>
+{% endblock %}

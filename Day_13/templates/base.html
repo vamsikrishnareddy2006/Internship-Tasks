@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Personal Expense Tracker{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+        <a href="{{ url_for('index') }}" class="logo">💰 ExpenseTracker</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button>
+        <nav class="nav-links" id="navLinks">
+            <a href="{{ url_for('index') }}" class="{{ 'active' if request.path == '/' else '' }}">Dashboard</a>
+            <a href="{{ url_for('add_expense') }}" class="{{ 'active' if request.path == '/add-expense' else '' }}">Add Expense</a>
+            <a href="{{ url_for('expenses') }}" class="{{ 'active' if request.path == '/expenses' else '' }}">Expenses</a>
+            <a href="{{ url_for('summary') }}" class="{{ 'active' if request.path == '/summary' else '' }}">Summary</a>
+            <button id="darkModeToggle" class="dark-toggle" title="Toggle dark mode">🌙</button>
+        </nav>
+    </div>
+</header>
+
+<main class="page-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-container">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <div class="footer-content">
+        <p>&copy; 2026 Personal Expense Tracker. Built with Flask, SQLite &amp; Jinja2.</p>
+        <p class="footer-sub">Track smart. Spend wise. 💸</p>
+    </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
