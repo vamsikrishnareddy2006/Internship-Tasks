@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Add Expense - Expense Tracker{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <h1>Add New Expense</h1>
+    <form action="{{ url_for('add_expense') }}" method="POST" class="expense-form" id="expenseForm" novalidate>
+        <div class="form-group">
+            <label for="title">Expense Title *</label>
+            <input type="text" id="title" name="title" value="{{ form.title or '' }}" placeholder="e.g. Grocery Shopping" required>
+            <span class="error-msg" id="titleError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Amount (₹) *</label>
+            <input type="number" id="amount" name="amount" value="{{ form.amount or '' }}" step="0.01" min="0.01" placeholder="e.g. 500.00" required>
+            <span class="error-msg" id="amountError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category *</label>
+            <select id="category" name="category" required>
+                <option value="" disabled {{ 'selected' if not form.category }}>Select a category</option>
+                {% for cat in categories %}
+                <option value="{{ cat }}" {{ 'selected' if form.category == cat }}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+            <span class="error-msg" id="categoryError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="payment_mode">Payment Mode *</label>
+            <select id="payment_mode" name="payment_mode" required>
+                <option value="" disabled {{ 'selected' if not form.payment_mode }}>Select payment mode</option>
+                {% for mode in payment_modes %}
+                <option value="{{ mode }}" {{ 'selected' if form.payment_mode == mode }}>{{ mode }}</option>
+                {% endfor %}
+            </select>
+            <span class="error-msg" id="paymentError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="expense_date">Date *</label>
+            <input type="date" id="expense_date" name="expense_date" value="{{ form.expense_date or '' }}" required>
+            <span class="error-msg" id="dateError"></span>
+        </div>
+
+        <div class="form-group full-width">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="3" placeholder="Optional notes about this expense">{{ form.description or '' }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Expense</button>
+            <a href="{{ url_for('expenses') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('expenseForm').addEventListener('submit', function (e) {
+        let valid = true;
+
+        const title = document.getElementById('title');
+        const amount = document.getElementById('amount');
+        const category = document.getElementById('category');
+        const paymentMode = document.getElementById('payment_mode');
+        const date = document.getElementById('expense_date');
+
+        document.querySelectorAll('.error-msg').forEach(el => el.textContent = '');
+
+        if (!title.value.trim()) {
+            document.getElementById('titleError').textContent = 'Title is required.';
+            valid = false;
+        }
+        if (!amount.value || parseFloat(amount.value) <= 0) {
+            document.getElementById('amountError').textContent = 'Enter a valid amount greater than 0.';
+            valid = false;
+        }
+        if (!category.value) {
+            document.getElementById('categoryError').textContent = 'Please select a category.';
+            valid = false;
+        }
+        if (!paymentMode.value) {
+            document.getElementById('paymentError').textContent = 'Please select a payment mode.';
+            valid = false;
+        }
+        if (!date.value) {
+            document.getElementById('dateError').textContent = 'Please select a date.';
+            valid = false;
+        }
+
+        if (!valid) e.preventDefault();
+    });
+</script>
+{% endblock %}
