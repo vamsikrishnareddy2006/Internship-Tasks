@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}DevPulse — About{% endblock %}
+{% block content %}
+
+<div class="hero">
+    <div class="eyebrow">about this project</div>
+    <h1>Why DevPulse exists</h1>
+    <p class="subtitle" style="max-width:60ch;">
+        A full-stack demonstration of connecting a trained machine learning model to a real,
+        working web application — end to end, with nothing mocked.
+    </p>
+</div>
+
+<div class="card">
+    <div class="card-title">aim</div>
+    <p class="risk-message" style="text-align:left; font-size:0.9rem; line-height:1.7;">
+        The aim of DevPulse is to help development teams monitor the health of their codebase and
+        commit activity in real time. By combining a machine learning model trained on developer
+        activity metrics — commit frequency, code review engagement, test coverage, and late-night
+        commits — with a Flask backend and an interactive interface, DevPulse automatically flags
+        risky commit patterns (Low, Medium, or High risk) before they lead to bugs, technical debt,
+        or production issues. Beyond prediction, the project demonstrates complete full-stack
+        integration: a trained model connected to a live web app, historical predictions persisted
+        in a database, and results presented through a clear, purpose-built interface.
+    </p>
+</div>
+
+<div class="result-grid">
+    <div class="card">
+        <div class="card-title">tech stack</div>
+        <table class="input-table">
+            <tr><td>Frontend</td><td>HTML, CSS, Jinja2</td></tr>
+            <tr><td>Backend</td><td>Flask (Python)</td></tr>
+            <tr><td>Model</td><td>scikit-learn Random Forest</td></tr>
+            <tr><td>Storage</td><td>SQLite</td></tr>
+            <tr><td>Persistence</td><td>joblib (.pkl)</td></tr>
+        </table>
+    </div>
+    <div class="card">
+        <div class="card-title">the model</div>
+        <table class="input-table">
+            <tr><td>Target</td><td>commit_risk</td></tr>
+            <tr><td>Classes</td><td>Low / Medium / High</td></tr>
+            <tr><td>Features</td><td>10</td></tr>
+            <tr><td>Tuning</td><td>GridSearchCV, 5-fold</td></tr>
+            <tr><td>Test accuracy</td><td>74.25%</td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">pipeline</div>
+    <div class="flow-strip" style="margin-bottom:0;">
+        <span class="node">HTML form</span><span class="arrow">→</span>
+        <span class="node">Flask /predict</span><span class="arrow">→</span>
+        <span class="node">scaler.pkl</span><span class="arrow">→</span>
+        <span class="node">best_model.pkl</span><span class="arrow">→</span>
+        <span class="node">predictions.db</span><span class="arrow">→</span>
+        <span class="node">result page</span>
+    </div>
+</div>
+
+<div class="back-row">
+    <a href="{{ url_for('predict_form') }}" class="btn btn-primary">▸ try a prediction</a>
+</div>
+
+{% endblock %}
