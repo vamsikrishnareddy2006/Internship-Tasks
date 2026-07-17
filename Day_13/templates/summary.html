@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Summary - Expense Tracker{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Expense Summary</h1>
+    <p>A complete overview of your spending patterns.</p>
+</section>
+
+<section class="dashboard-cards">
+    <div class="card">
+        <div class="card-icon">💵</div>
+        <div class="card-info">
+            <h3>Total Expenses</h3>
+            <p class="card-value">₹{{ "%.2f"|format(total_expenses) }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-icon">🔥</div>
+        <div class="card-info">
+            <h3>Highest Expense</h3>
+            {% if highest_expense %}
+            <p class="card-value">₹{{ "%.2f"|format(highest_expense.amount) }}</p>
+            <p class="card-sub">{{ highest_expense.title }} ({{ highest_expense.category }})</p>
+            {% else %}
+            <p class="card-value">-</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="charts-section">
+    <div class="chart-card">
+        <h2>Category-wise Spending</h2>
+        {% if chart_labels %}
+        <canvas id="categoryChart"></canvas>
+        {% else %}
+        <p class="empty-state">No data to display yet.</p>
+        {% endif %}
+    </div>
+    <div class="chart-card">
+        <h2>Monthly Spending Trend</h2>
+        {% if month_labels %}
+        <canvas id="monthlyChart"></canvas>
+        {% else %}
+        <p class="empty-state">No data to display yet.</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="table-section">
+    <h2>Category Breakdown</h2>
+    {% if category_summary %}
+    <div class="table-wrapper">
+        <table class="expense-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Number of Expenses</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in category_summary %}
+                <tr>
+                    <td><span class="badge">{{ row.category }}</span></td>
+                    <td>{{ row.count }}</td>
+                    <td>₹{{ "%.2f"|format(row.total) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No expenses recorded yet.</p>
+    {% endif %}
+</section>
+
+<section class="recent-section">
+    <h2>Recent Expenses</h2>
+    {% if recent_expenses %}
+    <div class="table-wrapper">
+        <table class="expense-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in recent_expenses %}
+                <tr>
+                    <td>{{ expense.title }}</td>
+                    <td><span class="badge">{{ expense.category }}</span></td>
+                    <td>₹{{ "%.2f"|format(expense.amount) }}</td>
+                    <td>{{ expense.expense_date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No recent expenses.</p>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+    const chartLabels = {{ chart_labels|tojson }};
+    const chartValues = {{ chart_values|tojson }};
+    const monthLabels = {{ month_labels|tojson }};
+    const monthValues = {{ month_values|tojson }};
+
+    if (chartLabels.length > 0) {
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    data: chartValues,
+                    backgroundColor: ['#6C63FF', '#FF6B6B', '#4ECDC4', '#FFD93D', '#1A936F', '#F77F00', '#3D5A80', '#EE6C4D']
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+
+    if (monthLabels.length > 0) {
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: [{
+                    label: 'Monthly Spending (₹)',
+                    data: monthValues,
+                    borderColor: '#6C63FF',
+                    backgroundColor: 'rgba(108, 99, 255, 0.15)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+    }
+</script>
+{% endblock %}

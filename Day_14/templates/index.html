@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}DevPulse - Predict Commit Risk{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Commit Risk Prediction</h1>
+    <p class="subtitle">Enter a developer's weekly activity metrics to predict commit risk using the trained ML model.</p>
+</div>
+
+<div class="flow-strip">
+    <span class="flow-step">HTML Form</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">Flask Backend</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">ML Model (.pkl)</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">Prediction</span>
+</div>
+
+{% if error %}
+<div class="alert-error">⚠️ {{ error }}</div>
+{% endif %}
+
+<form class="card form-card" action="{{ url_for('predict') }}" method="POST">
+    <div class="form-grid">
+        {% for name, label, placeholder, min_v, max_v in fields %}
+        <div class="form-group">
+            <label for="{{ name }}">{{ label }}</label>
+            <input
+                type="number"
+                step="any"
+                id="{{ name }}"
+                name="{{ name }}"
+                placeholder="{{ placeholder }}"
+                min="{{ min_v }}"
+                max="{{ max_v }}"
+                required>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="sample-row">
+        <button type="button" class="btn-ghost" onclick="fillSample()">Fill Sample Data</button>
+        <button type="submit" class="btn-primary">Predict Risk</button>
+    </div>
+</form>
+
+<script>
+function fillSample() {
+    const sample = {
+        commits_per_week: 8, lines_added: 89, lines_deleted: 54, files_changed: 1,
+        bugs_reported: 3, code_review_comments: 0, avg_review_time_hours: 4.5,
+        test_coverage_percent: 67.0, deployment_frequency: 2, late_night_commits: 1
+    };
+    for (const [key, val] of Object.entries(sample)) {
+        const el = document.getElementById(key);
+        if (el) el.value = val;
+    }
+}
+</script>
+{% endblock %}
