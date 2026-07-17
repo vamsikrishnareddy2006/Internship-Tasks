@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}DevPulse — Home{% endblock %}
+{% block content %}
+
+<div class="hero">
+    <div class="eyebrow">developer productivity &amp; code quality dashboard</div>
+    <h1 style="font-size:2rem; line-height:1.25;">Read the pulse of every commit before it becomes a problem.</h1>
+    <p class="subtitle" style="max-width:60ch;">
+        DevPulse watches the vitals behind your team's commits — volume, review discipline,
+        test coverage, late-night activity — and flags risky patterns as Low, Medium, or High
+        before they turn into bugs, outages, or tech debt.
+    </p>
+    <div style="display:flex; gap:0.8rem; margin-top:1.6rem; flex-wrap:wrap;">
+        <a href="{{ url_for('predict_form') }}" class="btn btn-primary">▸ run a prediction</a>
+        <a href="{{ url_for('about') }}" class="btn btn-ghost">learn how it works</a>
+    </div>
+</div>
+
+<div class="ekg-wrap" style="max-width:640px; height:80px; margin-bottom:2.2rem;">
+    <svg viewBox="0 0 300 90" preserveAspectRatio="none">
+        <polyline points="0,45 20,45 30,45 38,10 46,80 54,45 80,45 120,45 130,45 138,20 146,68 154,45
+                           180,45 220,45 230,45 238,10 246,80 254,45 280,45 300,45"
+            fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="filter: drop-shadow(0 0 5px #34D399);"/>
+    </svg>
+</div>
+
+<div class="result-grid" style="margin-bottom:1.5rem;">
+    <div class="card">
+        <div class="card-title">what it reads</div>
+        <table class="input-table">
+            <tr><td>commits_per_week</td><td>commit volume &amp; cadence</td></tr>
+            <tr><td>code_review_comments</td><td>review engagement</td></tr>
+            <tr><td>test_coverage_percent</td><td>safety net strength</td></tr>
+            <tr><td>late_night_commits</td><td>fatigue &amp; rushed changes</td></tr>
+        </table>
+    </div>
+    <div class="card">
+        <div class="card-title">how it decides</div>
+        <p class="risk-message" style="text-align:left; margin-bottom:1rem;">
+            A Random Forest classifier, trained on historical developer activity data,
+            reads all 10 vitals at once and returns a risk class with a confidence score —
+            not a single threshold, but a learned pattern across every metric together.
+        </p>
+        <div class="prob-bars">
+            <div class="prob-row"><span class="prob-label">low</span><div class="prob-track"><div class="prob-fill" style="width:100%; background:#34D399;"></div></div></div>
+            <div class="prob-row"><span class="prob-label">medium</span><div class="prob-track"><div class="prob-fill" style="width:100%; background:#F5A623;"></div></div></div>
+            <div class="prob-row"><span class="prob-label">high</span><div class="prob-track"><div class="prob-fill" style="width:100%; background:#F0554A;"></div></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="flow-strip">
+    <span class="node">form</span><span class="arrow">→</span>
+    <span class="node">flask /predict</span><span class="arrow">→</span>
+    <span class="node">best_model.pkl</span><span class="arrow">→</span>
+    <span class="node">sqlite log</span><span class="arrow">→</span>
+    <span class="node">result</span>
+</div>
+
+{% endblock %}

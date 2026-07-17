@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}DevPulse — Predict{% endblock %}
+{# active flag is passed from app.py as 'predict' #}
+
+{% block content %}
+<div class="hero">
+    <div class="eyebrow">commit risk monitor</div>
+    <h1>Check a developer's commit vitals</h1>
+    <p class="subtitle">Enter this week's activity metrics and DevPulse will read the signal — Low, Medium, or High risk — using the trained model.</p>
+</div>
+
+<div class="flow-strip">
+    <span class="node">form</span><span class="arrow">→</span>
+    <span class="node">flask /predict</span><span class="arrow">→</span>
+    <span class="node">best_model.pkl</span><span class="arrow">→</span>
+    <span class="node">sqlite log</span><span class="arrow">→</span>
+    <span class="node">result</span>
+</div>
+
+{% if error %}
+<div class="alert-error">⚠ error: {{ error }}</div>
+{% endif %}
+
+<form action="{{ url_for('predict') }}" method="POST">
+    <div class="terminal-card">
+        <div class="terminal-bar">
+            <span style="background:#F0554A"></span><span style="background:#F5A623"></span><span style="background:#34D399"></span>
+            <span class="path">metrics.env</span>
+        </div>
+        <div class="terminal-body">
+            <div class="form-grid">
+                {% for name, label, placeholder, min_v, max_v in fields %}
+                <div class="field">
+                    <label for="{{ name }}">{{ name }}</label>
+                    <input
+                        type="number" step="any"
+                        id="{{ name }}" name="{{ name }}"
+                        placeholder="{{ placeholder }}"
+                        min="{{ min_v }}" max="{{ max_v }}"
+                        required>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-footer">
+                <span class="hint">10 vitals required — hover a field to see its range</span>
+                <div style="display:flex; gap:0.7rem;">
+                    <button type="button" class="btn btn-ghost" onclick="fillSample()">↺ sample data</button>
+                    <button type="submit" class="btn btn-primary">▸ run prediction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+function fillSample() {
+    const sample = {
+        commits_per_week: 8, lines_added: 89, lines_deleted: 54, files_changed: 1,
+        bugs_reported: 3, code_review_comments: 0, avg_review_time_hours: 4.5,
+        test_coverage_percent: 67.0, deployment_frequency: 2, late_night_commits: 1
+    };
+    for (const [key, val] of Object.entries(sample)) {
+        const el = document.getElementById(key);
+        if (el) el.value = val;
+    }
+}
+</script>
+{% endblock %}

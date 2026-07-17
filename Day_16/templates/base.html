@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}DevPulse{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="{{ url_for('home') }}" class="logo"><span class="dot">●</span>devpulse</a>
+
+        <div class="pulse-wrap">
+            <svg viewBox="0 0 300 34" preserveAspectRatio="none">
+                <polyline class="pulse-line"
+                    style="--pulse-color: {{ pulse_color or 'var(--risk-low)' }};"
+                    points="0,17 20,17 28,17 34,4 40,30 46,17 60,17 90,17 98,17 104,4 110,30 116,17 130,17
+                            150,17 170,17 178,17 184,4 190,30 196,17 210,17 240,17 248,17 254,4 260,30 266,17 280,17 300,17" />
+            </svg>
+        </div>
+
+        <div class="nav-links">
+            {% if session.get('user_id') %}
+            <a href="{{ url_for('about') }}" class="{{ 'active' if active == 'about' else '' }}">about</a>
+            <a href="{{ url_for('home') }}" class="{{ 'active' if active == 'home' else '' }}">home</a>
+            <a href="{{ url_for('predict_form') }}" class="{{ 'active' if active == 'predict' else '' }}">predict</a>
+            <a href="{{ url_for('history') }}" class="{{ 'active' if active == 'history' else '' }}">history</a>
+            <span class="nav-user">{{ session.get('username') }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">logout</a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="{{ 'active' if active == 'login' else '' }}">login</a>
+            <a href="{{ url_for('signup') }}" class="btn btn-primary btn-sm">sign up</a>
+            {% endif %}
+        </div>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</nav>
+
+<main class="container {{ container_class or '' }}">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-stack">
+            {% for category, msg in messages %}
+            <div class="flash flash-{{ category }}">{{ msg }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">devpulse · developer productivity &amp; code quality dashboard · day 16</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
