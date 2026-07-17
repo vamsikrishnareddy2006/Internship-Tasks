@@ -1,0 +1,100 @@
+# Day 17 – DevPulse: Nav Order Updated (About / Home / Predict / History)
+
+**Project:** Developer Productivity & Code Quality Dashboard (DevPulse)
+**Focus:** Full integration of HTML + Flask + SQLite + ML model, with a complete visual redesign.
+
+---
+
+## 0. What Changed Today
+
+The app was previously a single-page-feeling tool (form + result + history). Today it was split
+into four distinct, purpose-built pages, each with its own route and template:
+
+| Page | Route | Purpose |
+|---|---|---|
+| **Home** | `/` | Landing page — explains what DevPulse does, what it reads, and how it decides, with CTAs into Predict and About |
+| **Predict** | `/predict` (GET form, POST submit) | The commit-risk input form and prediction flow |
+| **History** | `/history` | Git-log-styled feed of past predictions, read from SQLite |
+| **About** | `/about` | Project aim, tech stack, model details, and the full integration pipeline |
+
+The nav bar now links all four pages and highlights the active one. The signature pulse-line
+element and design language carry through every page for a consistent identity.
+
+## 1. What's New on Day 15 (carried forward)
+
+- **SQLite integration** — every prediction is now logged to a local `predictions.db` (table `predictions`), and a new **History** page shows past predictions in a git-log style feed.
+- **Full redesign** — moved from a generic card-based light UI to a distinctive "developer vitals monitor" identity that fits DevPulse's own name and audience.
+- **Verified end-to-end**: form → Flask → model → SQLite → result → history, all tested live.
+
+## 2. Design Direction
+
+DevPulse reads a developer's commit activity the way a heart-rate monitor reads vitals — so the whole UI leans into that metaphor instead of a generic dashboard look.
+
+- **Palette:** deep navy-black (`#0A0F1E`) rather than pure black, with an indigo primary (`#6366F1`) for actions and three semantic "vitals" colors carried through everywhere — emerald `#34D399` (Low), amber `#F5A623` (Medium), coral `#F0554A` (High).
+- **Type:** `JetBrains Mono` for headings, data, and labels (a real developer's typeface), paired with `Inter` for body copy — the same pairing feels native to tools like GitHub or Linear rather than a generic AI-app default.
+- **Signature element:** an animated EKG pulse line built into the nav bar, and a matching EKG waveform on the result page whose shape gets more jagged as risk increases — Low is a calm, evenly-spaced beat; High is sharp and erratic. This is the one deliberate visual risk, directly justified by the product's name.
+- **Form as terminal window:** the input form is styled like a code editor / `.env` file, with `$`-prefixed field labels and a three-dot terminal title bar, reinforcing that this is a developer tool.
+- **History as git log:** past predictions are shown as rows styled like `git log --oneline`, with a colored commit dot per risk level.
+- Dark-only by design (no light/dark toggle) — a deliberate choice consistent with the "always-on monitor" feel, not an oversight.
+
+## 3. What Was Integrated
+
+| Piece | Detail |
+|---|---|
+| HTML | `index.html` (form), `result.html` (EKG + probabilities), `history.html` (git-log feed), shared `base.html` |
+| Flask | `app.py` — `/` (form), `/predict` (POST → model → DB write → result), `/history` (DB read → feed) |
+| SQLite | `predictions.db`, table `predictions(id, ts, <10 feature columns>, prediction, confidence)`, created automatically on first run via `init_db()` |
+| ML model | `best_model.pkl` (Random Forest) + `scaler.pkl`, loaded once at startup |
+
+## 4. Testing Evidence
+
+Ran the server locally and tested every route with `curl`:
+
+| Test | Result |
+|---|---|
+| `GET /` | `HTTP 200` — form renders |
+| `POST /predict` (healthy metrics) | `HTTP 200` → **Low**, 98.33% confidence |
+| `POST /predict` (risky metrics) | `HTTP 200` → **High**, 57.54% confidence |
+| `POST /predict` (mixed metrics) | `HTTP 200` → **High**, 65.79% confidence |
+| `GET /history` | `HTTP 200` — shows all 3 logged predictions, most recent first, correct colors |
+| SQLite check | `SELECT * FROM predictions` returned all 3 rows with correct timestamps, predictions, and confidence values |
+
+No errors or warnings in the Flask log during any of these requests.
+
+## 5. Screenshots
+
+| Input Form | Prediction Result | History |
+|---|---|---|
+| `screenshots/1_input_form.png` | `screenshots/2_prediction_result.png` | `screenshots/3_history.png` |
+
+## 6. Project Structure
+
+```
+Day_15/
+├── app.py                    # Flask app + SQLite logging + history route
+├── train_model.py            # Retraining script (reused from Day 14)
+├── best_model.pkl / scaler.pkl / feature_names.pkl
+├── developer_productivity.csv
+├── requirements.txt
+├── make_screenshots.py
+├── screenshots/
+├── templates/
+│   ├── base.html             # Nav (Home/Predict/History/About) + pulse signature element
+│   ├── home.html             # Landing page
+│   ├── index.html            # Terminal-styled input form (Predict page)
+│   ├── result.html           # EKG-style risk visualization
+│   ├── history.html          # Git-log styled prediction history
+│   └── about.html            # Project aim, tech stack, model details, pipeline
+└── static/
+    ├── css/style.css         # Full design-token system
+    └── js/script.js
+```
+
+## 7. Running the Project
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+Then open http://127.0.0.1:5000 — `predictions.db` is created automatically on first run.

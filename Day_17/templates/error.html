@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}DevPulse — {{ code }}{% endblock %}
+{% block content %}
+
+<div class="error-wrap">
+    <div class="error-code">{{ code }}</div>
+    <h1>{{ "Page not found" if code == 404 else "Something went wrong" }}</h1>
+    <p class="subtitle" style="margin:0.5rem auto 1.75rem;">{{ message }}</p>
+    <a href="{{ url_for('home') }}" class="btn btn-primary">← back to home</a>
+</div>
+{% endblock %}
