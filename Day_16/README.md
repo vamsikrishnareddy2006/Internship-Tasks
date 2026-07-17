@@ -1,4 +1,4 @@
-# Day 17 – DevPulse: Nav Order Updated (About / Home / Predict / History)
+# Day 16 – DevPulse: Nav Order Updated (About / Home / Predict / History)
 
 **Project:** Developer Productivity & Code Quality Dashboard (DevPulse)
 **Focus:** Full integration of HTML + Flask + SQLite + ML model, with a complete visual redesign.
